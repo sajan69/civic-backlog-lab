@@ -1,0 +1,52 @@
+{
+  "dataset": "13 entirely synthetic requests with known outcomes and deliberate quality defects",
+  "verified_reimport_inserted_rows": 0,
+  "summary": {
+    "cohort_rows": 12,
+    "closed_count": 4,
+    "open_count": 3,
+    "unknown_outcome_count": 5,
+    "closed_only_median_days": 1.5,
+    "retained_rows_outside_scope": 1
+  },
+  "horizons": [
+    {
+      "horizon_days": 7,
+      "eligible_known": 5,
+      "closed_within_horizon": 2,
+      "too_recent_known": 2,
+      "unknown_outcome_excluded": 5,
+      "closure_fraction": 0.4
+    },
+    {
+      "horizon_days": 30,
+      "eligible_known": 3,
+      "closed_within_horizon": 2,
+      "too_recent_known": 4,
+      "unknown_outcome_excluded": 0,
+      "closure_fraction": 0.6666666666666666
+    }
+  ],
+  "open_age_bands": {
+    "under_7_days": 1,
+    "7_to_under_30_days": 1,
+    "30_days_or_more": 1
+  },
+  "quality": {
+    "input_records": 13,
+    "retained_unique": 13,
+    "invalid_records": 0,
+    "exact_duplicates": 0,
+    "ignored_field_values": 0,
+    "flag_counts": {
+      "closed_missing_date": 1,
+      "future_closure": 1,
+      "negative_duration": 1,
+      "outside_cohort": 1,
+      "status_date_conflict": 1,
+      "unknown_status": 1
+    },
+    "issues": []
+  },
+  "limitations": "Functional fixture checks, not public-data findings or performance measurements. Durations use floating calendar-clock days."
+}

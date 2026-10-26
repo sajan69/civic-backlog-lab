@@ -5,6 +5,7 @@ from . import __version__
 from .ingest import ingest, list_snapshots, read_manifest, snapshot, connect
 from .model import InputError
 from .analysis import analyze
+from .demo import generate, run_demo
 
 
 def main():
@@ -25,6 +26,9 @@ def main():
     command.add_argument("--db", required=True)
     command.add_argument("--snapshot", required=True)
     command.add_argument("--allow-partial", action="store_true")
+    command = commands.add_parser("generate", help="Write a fresh synthetic fixture")
+    command.add_argument("--out", required=True)
+    commands.add_parser("demo", help="Verify a temporary synthetic import and analysis")
     args = parser.parse_args()
     try:
         if args.command == "ingest":
@@ -37,6 +41,10 @@ def main():
             finally: connection.close()
         elif args.command == "analyze":
             result = analyze(args.db, args.snapshot, allow_partial=args.allow_partial)
+        elif args.command == "generate":
+            result = generate(args.out)
+        elif args.command == "demo":
+            result = run_demo()
         else:
             parser.print_help(); return
         print(json.dumps(result, indent=2, allow_nan=False))

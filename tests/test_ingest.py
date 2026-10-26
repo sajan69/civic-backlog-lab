@@ -111,5 +111,13 @@ class ImportTests(unittest.TestCase):
         connection = connect(self.db, read_only=True)
         self.assertEqual(connection.execute('SHOW TABLES').fetchall(), [('unrelated',)]); connection.close()
 
+    def test_database_sql_cannot_read_unrelated_local_files(self):
+        import duckdb
+        external = Path(self.temp.name) / 'external.csv'; external.write_text('value\nprivate-marker\n')
+        connection = connect(self.db)
+        with self.assertRaises(duckdb.Error):
+            connection.execute('SELECT * FROM read_csv_auto(?)', [str(external)]).fetchall()
+        connection.close()
+
 
 if __name__ == '__main__': unittest.main()

@@ -79,5 +79,10 @@ class AnalysisTests(unittest.TestCase):
         self.assertEqual(again["summary"]["open_count"], 1)
         self.assertEqual(second["summary"]["closed_count"], 1)
 
+    def test_excessive_group_output_refuses_instead_of_silently_truncating(self):
+        rows = [record(unique_key=str(1000 + n), agency=f'AGENCY_{n}') for n in range(201)]
+        with self.assertRaisesRegex(InputError, 'too_many_agency_groups'):
+            self.report(rows)
+
 
 if __name__ == '__main__': unittest.main()
