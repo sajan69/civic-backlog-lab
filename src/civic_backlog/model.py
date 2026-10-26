@@ -1,7 +1,7 @@
 """Version-one NYC311 projection and explicit snapshot time semantics."""
 
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 import re
 from typing import Any
@@ -41,7 +41,7 @@ def text(value: Any, limit: int, *, empty: str | None = None) -> str:
         if empty is not None:
             return empty
         raise RecordError("missing_text")
-    if not isinstance(value, str) or len(value) > limit or any(ord(c) < 32 or 0xD800 <= ord(c) <= 0xDFFF for c in value):
+    if not isinstance(value, str) or len(value) > limit or any(ord(c) < 32 or 127 <= ord(c) <= 159 or 0xD800 <= ord(c) <= 0xDFFF for c in value):
         raise RecordError("invalid_text")
     result = value.strip()
     if not result:
@@ -76,7 +76,7 @@ class Manifest:
                 raise ValueError()
             acquired = acquired.astimezone(timezone.utc).isoformat()
             start, end, observed = (civil_time(value[name]) for name in ("cohort_start", "cohort_end", "observed_at"))
-            if not start < end <= observed or (end - start).days > 366:
+            if not start < end <= observed or end - start > timedelta(days=366):
                 raise ValueError()
             agency = value.get("agency")
             if agency is not None:
