@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "civic-backlog-lab"
+version = "0.1.0"
+description = "Snapshot-based analysis of service-request backlogs"
+requires-python = ">=3.11"
+dependencies = ["duckdb==1.5.6"]
+
+[project.scripts]
+civic = "civic_backlog.cli:main"
+
+[tool.setuptools.package-data]
+civic_backlog = ["sql/*.sql"]
