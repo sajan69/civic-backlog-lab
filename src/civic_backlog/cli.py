@@ -4,6 +4,7 @@ import sys
 from . import __version__
 from .ingest import ingest, list_snapshots, read_manifest, snapshot, connect
 from .model import InputError
+from .analysis import analyze
 
 
 def main():
@@ -20,6 +21,10 @@ def main():
     command = commands.add_parser("info", help="Show snapshot provenance and quality counts")
     command.add_argument("--db", required=True)
     command.add_argument("--snapshot", required=True)
+    command = commands.add_parser("analyze", help="Compute explicit-denominator metrics for one snapshot")
+    command.add_argument("--db", required=True)
+    command.add_argument("--snapshot", required=True)
+    command.add_argument("--allow-partial", action="store_true")
     args = parser.parse_args()
     try:
         if args.command == "ingest":
@@ -30,6 +35,8 @@ def main():
             connection = connect(args.db, read_only=True)
             try: result = snapshot(connection, args.snapshot)
             finally: connection.close()
+        elif args.command == "analyze":
+            result = analyze(args.db, args.snapshot, allow_partial=args.allow_partial)
         else:
             parser.print_help(); return
         print(json.dumps(result, indent=2, allow_nan=False))
