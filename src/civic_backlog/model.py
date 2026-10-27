@@ -5,11 +5,13 @@ from datetime import datetime, timedelta, timezone
 import json
 import re
 from typing import Any
+from .provenance import validate_acquisition
 
 FIELDS = ("unique_key", "created_date", "closed_date", "agency", "complaint_type", "status", "borough")
 SOURCE_URL = "https://data.cityofnewyork.us/resource/erm2-nwe9.json"
 ALIASES = dict(zip(("Unique Key", "Created Date", "Closed Date", "Agency", "Problem", "Status", "Borough"), FIELDS))
 ALIASES["Complaint Type"] = "complaint_type"
+ALIASES["Problem (formerly Complaint Type)"] = "complaint_type"
 ALIASES.update({name: name for name in FIELDS})
 ACTIVE_STATUSES = {"open", "pending", "in progress", "started", "assigned"}
 BOROUGHS = {"BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "UNSPECIFIED"}
@@ -60,11 +62,12 @@ class Manifest:
     observed_at: datetime
     completeness: str
     agency: str | None = None
+    acquisition: dict | None = None
 
     @classmethod
     def parse(cls, value: Any) -> "Manifest":
         required = {"schema_version", "source", "acquired_at", "cohort_start", "cohort_end", "observed_at", "completeness", "timestamp_semantics"}
-        if not isinstance(value, dict) or set(value) - required - {"agency"} or not required <= set(value):
+        if not isinstance(value, dict) or set(value) - required - {"agency", "acquisition"} or not required <= set(value):
             raise InputError("invalid_manifest_fields")
         if type(value["schema_version"]) is not int or value["schema_version"] != 1 or value["timestamp_semantics"] != "floating_civil":
             raise InputError("unsupported_manifest")
@@ -83,16 +86,27 @@ class Manifest:
                 agency = text(agency, 40).upper()
         except (ValueError, TypeError, AttributeError):
             raise InputError("invalid_manifest_time_or_scope") from None
-        return cls(value["source"], acquired, start, end, observed, value["completeness"], agency)
+        acquisition = value.get("acquisition")
+        if acquisition is not None:
+            try:
+                if value["source"] != "nyc311": raise ValueError()
+                acquisition = validate_acquisition(acquisition, start, end, agency)
+            except (ValueError, TypeError, KeyError, AttributeError):
+                raise InputError("invalid_acquisition_metadata") from None
+        return cls(value["source"], acquired, start, end, observed, value["completeness"], agency, acquisition)
 
     def to_dict(self) -> dict:
-        return {"schema_version": 1, "adapter": "nyc311-projection-v1", "source": self.source,
+        result = {"schema_version": 1, "adapter": "nyc311-projection-v1", "source": self.source,
                 "source_url": SOURCE_URL if self.source == "nyc311" else None,
                 "acquired_at": self.acquired_at, "cohort_start": self.cohort_start.isoformat(timespec="milliseconds"),
                 "cohort_end": self.cohort_end.isoformat(timespec="milliseconds"),
                 "observed_at": self.observed_at.isoformat(timespec="milliseconds"), "completeness": self.completeness,
                 "completeness_basis": "caller_declared", "timestamp_semantics": "floating_civil", "agency": self.agency,
                 "projection_fields": list(FIELDS)}
+        if self.acquisition is not None:
+            result["acquisition"] = json.loads(canonical_json(self.acquisition))
+            result["completeness_basis"] = "recorded_paged_checks_unattested"
+        return result
 
 
 @dataclass(frozen=True)

@@ -36,6 +36,9 @@ def analyze(db, snapshot_id: str, *, allow_partial: bool = False) -> dict:
             raise InputError("too_many_agency_groups")
         connection.execute("COMMIT")
         warnings = ["completeness_is_caller_declared", "snapshot_is_not_event_history", "floating_civil_durations_are_not_timezone_adjusted"]
+        if context.get("acquisition") is not None:
+            warnings.append("paged_source_capture_is_not_atomic_or_authenticated")
+            warnings.append("observation_clock_uses_publisher_zone_assumption")
         if partial:
             warnings.append("partial_input_not_a_population_estimate")
         if summary["unknown_outcome_count"]:

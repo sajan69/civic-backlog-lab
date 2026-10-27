@@ -97,6 +97,9 @@ def parse_file(path: str | Path, manifest: Manifest, *, skip_invalid: bool = Fal
     path = Path(path)
     raw = _read(path, MAX_BYTES)
     records = _records(raw, path.suffix.lower().lstrip("."))
+    if manifest.acquisition is not None:
+        if hashlib.sha256(raw).hexdigest() != manifest.acquisition["payload_sha256"] or len(records) != manifest.acquisition["rows_written"]:
+            raise InputError("acquisition_payload_mismatch")
     unique: dict[str, Request] = {}
     invalid = duplicates = ignored = 0
     issues = []
