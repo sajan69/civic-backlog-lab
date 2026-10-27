@@ -4,7 +4,7 @@ A Python/SQL toolkit for analysing service-request backlogs without hiding open 
 
 ## Quick start
 
-Requires Python 3.11+. No account, credentials or network access is needed after installation.
+Requires Python 3.11+. The offline demo requires no account, credentials or network access after installation.
 
 ```sh
 python -m venv .venv
@@ -79,6 +79,6 @@ python -m unittest discover -s tests -v
 civic demo
 ```
 
-61 tests cover parsing, time semantics, quality flags, duplicates, atomic rollback, snapshot isolation, denominator boundaries, acquisition limits/provenance, partial-input safeguards, SQL access limits, safe exports, local HTTP access controls and the CLI. CI installs the package on Python 3.11–3.13 and runs the demo. A separate Chromium job verifies dashboard controls, downloads, responsive layout and inert HTML labels. The published public-data report is limited to one agency/day; no throughput or production performance claim is made.
+63 tests cover parsing, time semantics, quality flags, duplicates, atomic rollback, snapshot isolation, denominator boundaries, acquisition limits/provenance, partial-input safeguards, SQL access limits, safe exports, local HTTP access controls and the CLI. CI installs the package on Python 3.11–3.13 and runs the demo. A separate Chromium job verifies dashboard controls, downloads, responsive layout and inert HTML labels. The published public-data report is limited to one agency/day. `civic benchmark --rows 1000 --repeats 3` reproduces a bounded synthetic workload; [recorded measurements](docs/MEASUREMENTS.md) include individual timings and environment. See [architecture and trust boundaries](docs/ARCHITECTURE.md). No production performance claim is made.
 
 Source references: [NYC 311 dataset](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9/about_data), [official reporting context](https://www.nyc.gov/site/311reporting/311-reports/service-requests.page), [Socrata floating timestamps](https://dev.socrata.com/docs/datatypes/floating_timestamp.html).

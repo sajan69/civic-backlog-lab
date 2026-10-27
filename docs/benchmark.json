@@ -1,0 +1,64 @@
+{
+  "workload": {
+    "source": "synthetic",
+    "unique_rows": 1000,
+    "input_rows": 1100,
+    "normalized_duplicates": 100,
+    "closed": 500,
+    "open": 250,
+    "unknown": 250,
+    "agencies": 5,
+    "payload_bytes": 197952,
+    "payload_sha256": "7cd94f1e91ee776bd08fb2fb91c0cf98b02dbb5adbb3c560ee8bebca2d9f0644",
+    "repeats": 3
+  },
+  "method": {
+    "timer": "time.perf_counter wall clock",
+    "storage": "fresh DuckDB file per repeat in system temporary directory",
+    "import": "file read, parse, normalize, deduplicate, schema creation and transaction",
+    "same_snapshot_reimport": "file read/validation plus existing immutable snapshot lookup; zero inserted",
+    "analysis": "new read-only connection, snapshot lookup and all five aggregate SQL resources",
+    "excluded": "fixture generation, network, HTTP, browser rendering and export serialization",
+    "cache": "no explicit warmup; sequential same-process repetitions; OS caches not cleared"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "duckdb": "1.5.6",
+    "package": "0.1.0",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "duckdb_threads": 2,
+    "duckdb_memory_limit": "256MiB"
+  },
+  "measurements": [
+    {
+      "repeat": 1,
+      "import_ms": 2138.782,
+      "same_snapshot_reimport_ms": 37.482,
+      "analysis_ms": 29.391
+    },
+    {
+      "repeat": 2,
+      "import_ms": 1970.673,
+      "same_snapshot_reimport_ms": 31.831,
+      "analysis_ms": 26.076
+    },
+    {
+      "repeat": 3,
+      "import_ms": 1892.013,
+      "same_snapshot_reimport_ms": 49.398,
+      "analysis_ms": 36.537
+    }
+  ],
+  "median_ms": {
+    "import_ms": 1970.673,
+    "same_snapshot_reimport_ms": 37.482,
+    "analysis_ms": 29.391
+  },
+  "limitations": [
+    "Synthetic local workload; no production throughput, HTTP rate or comparative speed claim.",
+    "Shared execution host and temporary filesystem; cache, load and storage affect timings.",
+    "Correctness assertions are workload-specific; this is not a general data-quality accuracy evaluation."
+  ]
+}

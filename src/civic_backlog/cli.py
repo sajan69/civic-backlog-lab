@@ -9,6 +9,7 @@ from .demo import generate, run_demo
 from .fetch import fetch_snapshot
 from .exports import export_report
 from .dashboard import serve
+from .benchmark import benchmark
 
 
 def main():
@@ -50,11 +51,16 @@ def main():
     command.add_argument("--snapshot", required=True)
     command.add_argument("--port", type=int, default=0)
     command.add_argument("--allow-partial", action="store_true")
+    command = commands.add_parser("benchmark", help="Measure a bounded synthetic import/query workload")
+    command.add_argument("--rows", type=int, default=1000)
+    command.add_argument("--repeats", type=int, default=3)
     args = parser.parse_args()
     try:
         if args.command == "serve":
             serve(args.db, args.snapshot, port=args.port, allow_partial=args.allow_partial)
             return
+        elif args.command == "benchmark":
+            result = benchmark(args.rows, args.repeats)
         elif args.command == "ingest":
             result = ingest(args.input, read_manifest(args.manifest), args.db, skip_invalid=args.skip_invalid)
         elif args.command == "snapshots":
