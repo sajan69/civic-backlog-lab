@@ -7,6 +7,7 @@ from .model import InputError
 from .analysis import analyze
 from .demo import generate, run_demo
 from .fetch import fetch_snapshot
+from .exports import export_report
 
 
 def main():
@@ -37,6 +38,12 @@ def main():
     command.add_argument("--agency", required=True)
     command.add_argument("--max-rows", type=int, default=20000)
     command.add_argument("--page-size", type=int, default=1000)
+    command = commands.add_parser("export", help="Write an exclusive aggregate JSON/CSV report")
+    command.add_argument("--db", required=True)
+    command.add_argument("--snapshot", required=True)
+    command.add_argument("--out", required=True)
+    command.add_argument("--format", choices=("json", "csv"), required=True)
+    command.add_argument("--allow-partial", action="store_true")
     args = parser.parse_args()
     try:
         if args.command == "ingest":
@@ -55,6 +62,8 @@ def main():
             result = run_demo()
         elif args.command == "fetch":
             result = fetch_snapshot(args.out, args.start, args.end, args.agency, row_limit=args.max_rows, page_size=args.page_size)
+        elif args.command == "export":
+            result = export_report(args.db, args.snapshot, args.out, args.format, allow_partial=args.allow_partial)
         else:
             parser.print_help(); return
         print(json.dumps(result, indent=2, allow_nan=False))
