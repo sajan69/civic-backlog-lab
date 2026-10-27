@@ -8,6 +8,7 @@ from .analysis import analyze
 from .demo import generate, run_demo
 from .fetch import fetch_snapshot
 from .exports import export_report
+from .dashboard import serve
 
 
 def main():
@@ -44,9 +45,17 @@ def main():
     command.add_argument("--out", required=True)
     command.add_argument("--format", choices=("json", "csv"), required=True)
     command.add_argument("--allow-partial", action="store_true")
+    command = commands.add_parser("serve", help="View one aggregate snapshot on loopback")
+    command.add_argument("--db", required=True)
+    command.add_argument("--snapshot", required=True)
+    command.add_argument("--port", type=int, default=0)
+    command.add_argument("--allow-partial", action="store_true")
     args = parser.parse_args()
     try:
-        if args.command == "ingest":
+        if args.command == "serve":
+            serve(args.db, args.snapshot, port=args.port, allow_partial=args.allow_partial)
+            return
+        elif args.command == "ingest":
             result = ingest(args.input, read_manifest(args.manifest), args.db, skip_invalid=args.skip_invalid)
         elif args.command == "snapshots":
             result = list_snapshots(args.db)

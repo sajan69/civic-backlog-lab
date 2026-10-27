@@ -13,4 +13,4 @@ dependencies = ["duckdb==1.5.6", "tzdata==2026.5"]
 civic = "civic_backlog.cli:main"
 
 [tool.setuptools.package-data]
-civic_backlog = ["sql/*.sql"]
+civic_backlog = ["sql/*.sql", "static/*"]

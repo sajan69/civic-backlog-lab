@@ -52,13 +52,23 @@ civic export --db data/dot.duckdb --snapshot SNAPSHOT_ID --format csv --out expo
 
 Exports contain aggregates, coverage warnings and context. They refuse existing files and oversized reports. CSV quotes all fields and prefixes formula-like text for common spreadsheet importers; JSON preserves labels. See the [bounded DOT cohort findings](docs/PUBLIC_FINDINGS.md) for actual public-data results and limits.
 
+## Local dashboard
+
+```sh
+civic serve --db data/example.duckdb --snapshot SNAPSHOT_ID
+```
+
+Open the full URL printed by the command. The read-only dashboard shows cohort counts, seven-/30-day eligibility and exclusions, open-case age bands, agency rows, quality warnings and provenance. JSON/CSV buttons download the full aggregate report; table filtering does not change totals or exports. Partial snapshots still require `--allow-partial` at startup.
+
+The server binds only to `127.0.0.1`, chooses a free port by default and serves one frozen report. The URL fragment carries a temporary access token; the tab removes it from the address bar and keeps it only in memory. Reopen the printed URL after refreshing. Treat that URL as private. No uploads, collection requests, SQL endpoints or database writes are exposed. Use Ctrl-C to stop; this is a local inspection tool, not an internet-facing service.
+
 ## Metrics and limitations
 
 Recent cases are excluded from each horizon until they have the full seven or 30 days of follow-up, including recent fast closures. Eligible open cases remain in the denominator. Inconsistent outcomes are counted separately and excluded transparently. The SQL is inspectable in [src/civic_backlog/sql](src/civic_backlog/sql).
 
 Timestamps retain the source's floating civil-time semantics. Durations are calendar-clock days, not timezone-adjusted elapsed time or an SLA. A current-status snapshot cannot reconstruct reopenings or historical event transitions. Administrative closure does not prove the reported problem was resolved.
 
-Local-export completeness is caller-declared. Collector metadata records bounded paging checks, not proof of an atomic or authentic source snapshot. No browser interface is included. Keep real exports and databases private and outside Git. The retained projection is data minimization, not guaranteed anonymization. Use trusted local databases and directories.
+Local-export completeness is caller-declared. Collector metadata records bounded paging checks, not proof of an atomic or authentic source snapshot. Keep real exports and databases private and outside Git. The retained projection is data minimization, not guaranteed anonymization. Use trusted local databases and directories.
 
 See the [input, provenance and metric contract](docs/DATA_CONTRACT.md) and [recorded synthetic output](docs/demo.json).
 
@@ -69,6 +79,6 @@ python -m unittest discover -s tests -v
 civic demo
 ```
 
-56 tests cover parsing, time semantics, quality flags, duplicates, atomic rollback, snapshot isolation, denominator boundaries, acquisition limits/provenance, partial-input safeguards, SQL access limits, safe exports and the CLI. CI installs the package on Python 3.11–3.13 and runs the demo. The published public-data report is limited to one agency/day; no throughput or production performance claim is made.
+61 tests cover parsing, time semantics, quality flags, duplicates, atomic rollback, snapshot isolation, denominator boundaries, acquisition limits/provenance, partial-input safeguards, SQL access limits, safe exports, local HTTP access controls and the CLI. CI installs the package on Python 3.11–3.13 and runs the demo. A separate Chromium job verifies dashboard controls, downloads, responsive layout and inert HTML labels. The published public-data report is limited to one agency/day; no throughput or production performance claim is made.
 
 Source references: [NYC 311 dataset](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9/about_data), [official reporting context](https://www.nyc.gov/site/311reporting/311-reports/service-requests.page), [Socrata floating timestamps](https://dev.socrata.com/docs/datatypes/floating_timestamp.html).

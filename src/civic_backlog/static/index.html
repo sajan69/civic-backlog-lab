@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civic Backlog Lab</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><main><header><p class="eyebrow">CIVIC BACKLOG LAB / SNAPSHOT EXPLORER</p><h1>See the work still open.</h1><p>Closure speed tells only part of the story. Explore the backlog and the cases behind each denominator.</p></header>
+<p id="message" role="status">Loading snapshot…</p><div id="report" hidden>
+<section><h2>Observation</h2><p id="context"></p><p id="coverage"></p><div class="actions"><button id="json">Download JSON</button><button id="csv">Download CSV</button></div></section>
+<section class="cards" id="counts" aria-label="Cohort counts"></section>
+<div class="columns"><section><h2>Closure with full follow-up</h2><label for="horizon">Observation horizon</label> <select id="horizon"><option value="7">7 days</option><option value="30">30 days</option></select><p class="large" id="fraction"></p><p id="denominator"></p><p id="exclusions"></p><p class="note">Recent fast closures are excluded too. Unknown outcomes are outside the known-case denominator.</p></section>
+<section><h2>Age of known open cases</h2><div id="ages"></div><p class="note">Calendar-clock days at observation; administrative closure does not prove resolution.</p></section></div>
+<section><h2>By agency</h2><label for="agency">Filter displayed agencies</label> <input id="agency" type="search" maxlength="160" placeholder="Agency name"><p class="note">This filters table rows only. Snapshot totals and downloads remain unchanged.</p><div class="table-wrap"><table><thead><tr><th>Agency</th><th>Cohort</th><th>Closed</th><th>Open</th><th>Unknown</th></tr></thead><tbody id="agencies"></tbody></table></div><p id="agency-count"></p></section>
+<section><h2>Quality and interpretation</h2><ul id="warnings"></ul><pre id="quality"></pre></section>
+<details><summary>Snapshot provenance</summary><pre id="provenance"></pre></details>
+</div><footer>Local aggregate analysis · source timestamps retain floating civil time</footer></main></body></html>
