@@ -37,6 +37,8 @@ def analyze(db, snapshot_id: str, *, allow_partial: bool = False) -> dict:
         connection.execute("COMMIT")
         warnings = ["completeness_is_caller_declared", "snapshot_is_not_event_history", "floating_civil_durations_are_not_timezone_adjusted"]
         if context.get("acquisition") is not None:
+            warnings.remove("completeness_is_caller_declared")
+            warnings.append("acquisition_metadata_is_unattested")
             warnings.append("paged_source_capture_is_not_atomic_or_authenticated")
             warnings.append("observation_clock_uses_publisher_zone_assumption")
         if partial:

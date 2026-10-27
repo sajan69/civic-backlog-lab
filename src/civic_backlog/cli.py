@@ -6,6 +6,7 @@ from .ingest import ingest, list_snapshots, read_manifest, snapshot, connect
 from .model import InputError
 from .analysis import analyze
 from .demo import generate, run_demo
+from .fetch import fetch_snapshot
 
 
 def main():
@@ -29,6 +30,13 @@ def main():
     command = commands.add_parser("generate", help="Write a fresh synthetic fixture")
     command.add_argument("--out", required=True)
     commands.add_parser("demo", help="Verify a temporary synthetic import and analysis")
+    command = commands.add_parser("fetch", help="Capture a bounded one-agency NYC311 cohort")
+    command.add_argument("--out", required=True)
+    command.add_argument("--start", required=True, help="Inclusive creation date, YYYY-MM-DD")
+    command.add_argument("--end", required=True, help="Exclusive creation date, YYYY-MM-DD")
+    command.add_argument("--agency", required=True)
+    command.add_argument("--max-rows", type=int, default=20000)
+    command.add_argument("--page-size", type=int, default=1000)
     args = parser.parse_args()
     try:
         if args.command == "ingest":
@@ -45,6 +53,8 @@ def main():
             result = generate(args.out)
         elif args.command == "demo":
             result = run_demo()
+        elif args.command == "fetch":
+            result = fetch_snapshot(args.out, args.start, args.end, args.agency, row_limit=args.max_rows, page_size=args.page_size)
         else:
             parser.print_help(); return
         print(json.dumps(result, indent=2, allow_nan=False))

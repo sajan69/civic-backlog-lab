@@ -57,10 +57,14 @@ def validate_acquisition(value, start, end, agency) -> dict:
     offset = 0
     for page in pages:
         if not isinstance(page, dict) or set(page) != {'offset', 'rows', 'sha256'}: raise ValueError('invalid_acquisition_pages')
-        if page['offset'] != offset or not integer(page['rows'], 0, value['page_size']): raise ValueError('invalid_acquisition_pages')
+        if not integer(page['offset'], 0, 20000) or page['offset'] != offset or not integer(page['rows'], 0, value['page_size']): raise ValueError('invalid_acquisition_pages')
         if not isinstance(page['sha256'], str) or not re.fullmatch('[0-9a-f]{64}', page['sha256']): raise ValueError('invalid_acquisition_pages')
         offset += page['rows']
     if offset != value['rows_written'] or value['network_requests'] != len(pages) + 4:
         raise ValueError('invalid_acquisition_pages')
+    stable = (value['source_count_before'] == value['source_count_after'] == value['rows_written']
+              and value['source_updated_before'] is not None and value['source_updated_before'] == value['source_updated_after'])
+    if (value['consistency'] == 'stable_checks') != stable:
+        raise ValueError('inconsistent_acquisition_checks')
     # Copy nested user input; it is a record of checks, not cryptographic proof of origin.
     return json.loads(json.dumps(value, allow_nan=False))
