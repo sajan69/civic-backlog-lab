@@ -14,7 +14,7 @@ The version-one adapter retains these NYC311 API fields:
 | `status` | Current source status |
 | `borough` | Borough grouping label |
 
-JSON input is an array of objects using API field names. CSV accepts those names or the public display labels Unique Key, Created Date, Closed Date, Agency, Problem, Status and Borough. The older Complaint Type label also maps to `complaint_type`. Two headers mapping to one field are refused. NYC's current display-label changes leave backend API field names unchanged, as checked on 27 October 2026: https://www.nyc.gov/opendata/news/all-news/311-Service-Requests-Updates .
+JSON input is an array of objects using API field names. CSV accepts those names or the public display labels Unique Key, Created Date, Closed Date, Agency, Problem, Status and Borough. The older Complaint Type label and the current metadata label Problem (formerly Complaint Type) also map to `complaint_type`. Two headers mapping to one field are refused. NYC's current display-label changes leave backend API field names unchanged, as checked on 27 October 2026: https://www.nyc.gov/opendata/news/all-news/311-Service-Requests-Updates .
 
 Other fields are ignored and their values never enter the normalized rows or metadata. Input bytes are hashed for provenance, not stored wholesale. This is a deliberately small projection, not a complete NYC311 schema validator or an anonymization guarantee. Do not commit real raw exports, databases or person-identifying data.
 
@@ -42,7 +42,7 @@ The UTF-8 reader accepts an optional BOM. It caps input at 10 MiB and 20,000 rec
 
 `acquired_at` is an offset-aware acquisition instant normalized to UTC. It is distinct from `observed_at`, which is a floating source-clock value representing the observation used for this snapshot. The importer does not infer a timezone or validate that a supplied observation truly represents when the source was captured. Supply metadata matching the export, not an arbitrary historical date. A current export cannot establish past statuses, reopenings or an event log.
 
-`completeness` is complete, unknown or truncated, and is explicitly recorded as **caller-declared**. A complete declaration is not an independent proof that every NYC request was included. Query scope is represented by the creation window and optional agency; the original remote query and an atomic remote snapshot have not been verified by this local importer. Analysis refuses unknown/truncated declarations or skipped-record imports unless `--allow-partial` is supplied; that option adds a population-estimation warning.
+`completeness` is complete, unknown or truncated. For local exports it is explicitly **caller-declared**. A complete declaration is not an independent proof that every NYC request was included. Query scope is represented by the creation window and optional agency. An optional validated acquisition extension records collector queries/checks; it is not proof of an atomic remote snapshot or authenticated provenance. Analysis refuses unknown/truncated declarations or skipped-record imports unless `--allow-partial` is supplied; that option adds a population-estimation warning.
 
 ## Floating time
 
@@ -83,3 +83,32 @@ Zero eligible cases produce JSON null for the fraction, not zero. Agency summari
 The deterministic fixture has 13 records: 12 in the creation cohort, four validated closed outcomes, three known open cases and five unknown outcomes. One record lies outside the cohort. The closed-only durations are 1, 2, 10 and 1 days (median 1.5), while seven-day closure is 2/5 eligible cases. Thirty-day closure is 2/3 eligible cases. Each open-age band has one case. Six distinct quality flags expose the deliberate anomalies.
 
 `civic demo` asserts these results and zero inserts on repeated import, then removes temporary data. [demo.json](demo.json) records actual output. These exact fixture checks do not establish source-data accuracy, public-service performance or ingestion/query throughput.
+
+## Bounded acquisition
+
+`civic fetch --start YYYY-MM-DD --end YYYY-MM-DD --agency CODE --out NEW_DIRECTORY` uses the fixed public legacy NYC311 endpoint. A live metadata/count probe on 27 October 2026 confirmed this endpoint still accepts credential-free reads; the newer SODA3 protocol has different authentication requirements and is not silently substituted. No arbitrary URL, user-written SoQL, credential or callback is accepted. Agency codes are bounded ASCII letters/digits/underscores/hyphens and dates become validated midnight civil timestamps. The end date is exclusive and the window is at most seven days.
+
+The collector verifies projected metadata types, counts the filtered cohort, selects only the seven allowed fields, orders by unique text ID and pages with explicit offsets. Strictly increasing IDs detect duplicate/reordered pages. It records before/after count and global update-marker checks. Up to 20 data pages and 24 total requests are permitted; page size is 1–1,000, row cap 1–20,000, each response at most 2 MiB and total response bytes at most 16 MiB. The final projected JSON must fit the normal 10 MiB import limit. The transport uses a 15-second network-operation timeout; it is not a universal wall-clock deadline. There are no automatic retries or paid APIs.
+
+Redirects, HTML, schema/scope/order failures, rate limits and transport byte failures abort without publishing a capture. Row/page caps produce explicit truncated captures. Completed pagination with matching counts and a non-null unchanged update marker is complete **as checked**; otherwise it is unknown. Completeness is not transactional: updates with unchanged counts, delayed markers or cache behavior may escape detection. Analysis exposes a non-atomic/unattested warning even for complete captures.
+
+Observation time is derived from acquisition UTC using America/New_York as an explicit publisher-clock assumption. Source request timestamps remain floating; the conversion applies only to the observation clock. Packaged tzdata supports hosts without system IANA files. This assumption does not establish a timezone for every source value.
+
+Only after successful validation does the collector create a fresh private directory with projected requests.json and manifest.json. Existing directories/files are refused. POSIX modes are 0700 for the final directory and 0600 for files; Windows requires appropriate directory ACLs. A filesystem failure may leave a partial private directory; it is reported as failure and never silently replaces existing work.
+
+The optional acquisition extension binds method, fixed endpoint, exact projected query, page size/caps/hashes, before/after counts/update markers, type metadata, request count, capture times, termination and projected payload SHA-256. Imports verify the local payload hash and row count; contradictory complete/consistency metadata is refused. Old manifests without the extension retain their previous serialization and snapshot identities. Metadata remains editable/unattested, and hashes are not signatures.
+
+Official query guidance checked on 27 October 2026:
+
+- https://dev.socrata.com/docs/queries/limit.html
+- https://dev.socrata.com/docs/queries/offset.html
+- https://dev.socrata.com/docs/queries/order.html
+- https://dev.socrata.com/docs/endpoints.html
+
+## Report exports
+
+`civic export --db DATABASE --snapshot SNAPSHOT_ID --format json|csv --out NEW_FILE` uses the same partial-input guard as analysis. JSON includes the full aggregate report and provenance; CSV flattens summary, horizons, open age bands, agency metrics and quality counts, repeating snapshot/cohort/clock/completeness/warning context. It exports no per-request rows. CSV blank values represent undefined metrics; denominators remain explicit. JSON is preferred when full query/page provenance is needed.
+
+Exports refuse more than 2,000 CSV metric rows or 2 MiB of serialized output rather than truncating. Existing files and symlinks are refused using exclusive creation; new POSIX files use mode 0600. Parent directories must already exist and be trusted. Serialization/limit checks precede file creation; interrupted or failed physical writes can leave an incomplete new file. No atomic replacement or overwrite is offered.
+
+CSV quotes every field and prefixes formula-like string cells with an apostrophe, including leading whitespace and common compatibility-width characters. Numeric metrics stay numeric and JSON preserves original labels. This mitigates common spreadsheet formula interpretation; it is not a guarantee for every spreadsheet/import path. Keep original data separate from spreadsheet views.

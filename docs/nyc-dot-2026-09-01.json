@@ -1,0 +1,142 @@
+{
+  "snapshot": {
+    "snapshot_id": "8764af576ca3c99e75b0fbe20b5740d2adb21ac641c06b55aaceee32fefe636c",
+    "manifest": {
+      "acquired_at": "2026-10-27T01:01:26.460783+00:00",
+      "acquisition": {
+        "capture_finished_at": "2026-10-27T01:01:26.460783+00:00",
+        "capture_started_at": "2026-10-27T01:00:56.445873+00:00",
+        "consistency": "stable_checks",
+        "endpoint": "https://data.cityofnewyork.us/resource/erm2-nwe9.json",
+        "field_types": {
+          "agency": "text",
+          "borough": "text",
+          "closed_date": "calendar_date",
+          "complaint_type": "text",
+          "created_date": "calendar_date",
+          "status": "text",
+          "unique_key": "text"
+        },
+        "network_requests": 7,
+        "observation_clock": "America/New_York_publisher_assumption",
+        "page_size": 300,
+        "pages": [
+          {
+            "offset": 0,
+            "rows": 300,
+            "sha256": "d7eafec077471f8ad8177e1faef1fe8a2dbabcba22c6f529f5305b6d70b874f5"
+          },
+          {
+            "offset": 300,
+            "rows": 300,
+            "sha256": "8b56cc3e5533285d1fdbb3d0003482520382838dc6391fe50ac7667a5ea6db8d"
+          },
+          {
+            "offset": 600,
+            "rows": 168,
+            "sha256": "804e56418be5227301e0b067c3dee28079a35d67b74356ca4acf08c89c484eef"
+          }
+        ],
+        "payload_sha256": "280671e4666964a9b2d3596c0caf856d07abe750dc5ac5a4a9d8218db9912fe8",
+        "protocol": "nyc311-soda2-paged-v1",
+        "query": {
+          "$order": "unique_key ASC",
+          "$select": "unique_key,created_date,closed_date,agency,complaint_type,status,borough",
+          "$where": "created_date >= '2026-09-01T00:00:00.000' AND created_date < '2026-09-02T00:00:00.000' AND agency = 'DOT'"
+        },
+        "row_limit": 20000,
+        "rows_written": 768,
+        "source_count_after": 768,
+        "source_count_before": 768,
+        "source_updated_after": 1792978673,
+        "source_updated_before": 1792978673,
+        "termination": "exhausted"
+      },
+      "adapter": "nyc311-projection-v1",
+      "agency": "DOT",
+      "cohort_end": "2026-09-02T00:00:00.000",
+      "cohort_start": "2026-09-01T00:00:00.000",
+      "completeness": "complete",
+      "completeness_basis": "recorded_paged_checks_unattested",
+      "invalid_record_policy": "strict",
+      "observed_at": "2026-10-26T21:01:26.460",
+      "projection_fields": [
+        "unique_key",
+        "created_date",
+        "closed_date",
+        "agency",
+        "complaint_type",
+        "status",
+        "borough"
+      ],
+      "schema_version": 1,
+      "source": "nyc311",
+      "source_url": "https://data.cityofnewyork.us/resource/erm2-nwe9.json",
+      "timestamp_semantics": "floating_civil"
+    },
+    "raw_sha256": "280671e4666964a9b2d3596c0caf856d07abe750dc5ac5a4a9d8218db9912fe8",
+    "raw_bytes": 151453,
+    "quality": {
+      "exact_duplicates": 0,
+      "flag_counts": {
+        "status_date_conflict": 9
+      },
+      "ignored_field_values": 0,
+      "input_records": 768,
+      "invalid_records": 0,
+      "issues": [],
+      "retained_unique": 768
+    },
+    "row_count": 768
+  },
+  "summary": {
+    "cohort_rows": 768,
+    "closed_count": 667,
+    "open_count": 92,
+    "unknown_outcome_count": 9,
+    "closed_only_median_days": 2.1733101851851853,
+    "retained_rows_outside_scope": 0
+  },
+  "horizons": [
+    {
+      "horizon_days": 7,
+      "eligible_known": 759,
+      "closed_within_horizon": 410,
+      "too_recent_known": 0,
+      "unknown_outcome_excluded": 9,
+      "closure_fraction": 0.5401844532279315
+    },
+    {
+      "horizon_days": 30,
+      "eligible_known": 759,
+      "closed_within_horizon": 648,
+      "too_recent_known": 0,
+      "unknown_outcome_excluded": 9,
+      "closure_fraction": 0.8537549407114624
+    }
+  ],
+  "open_age_bands": {
+    "under_7_days": 0,
+    "7_to_under_30_days": 0,
+    "30_days_or_more": 92
+  },
+  "by_agency": [
+    {
+      "agency": "DOT",
+      "cohort_rows": 768,
+      "closed_count": 667,
+      "open_count": 92,
+      "unknown_outcome_count": 9,
+      "closed_only_median_days": 2.1733101851851853
+    }
+  ],
+  "duration_unit": "floating_calendar_clock_days",
+  "warnings": [
+    "snapshot_is_not_event_history",
+    "floating_civil_durations_are_not_timezone_adjusted",
+    "acquisition_metadata_is_unattested",
+    "paged_source_capture_is_not_atomic_or_authenticated",
+    "observation_clock_uses_publisher_zone_assumption",
+    "unknown_outcomes_excluded_from_horizon_denominators"
+  ]
+}

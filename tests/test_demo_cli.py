@@ -46,5 +46,22 @@ class DemoTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2)
             self.assertNotIn('private', result.stderr); self.assertNotIn('Traceback', result.stderr)
 
+    def test_installed_cli_exports_both_formats_and_refuses_overwrite(self):
+        def command(*args):
+            return subprocess.run([sys.executable, '-m', 'civic_backlog.cli', *map(str,args)], capture_output=True, text=True, timeout=15)
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory); fixture=root/'fixture'; db=root/'data.duckdb'
+            self.assertEqual(command('generate','--out',fixture).returncode,0)
+            imported=command('ingest',fixture/'requests.json','--manifest',fixture/'manifest.json','--db',db)
+            snapshot=json.loads(imported.stdout)['snapshot_id']
+            for file_format in ('json','csv'):
+                out=root/('report.'+file_format)
+                first=command('export','--db',db,'--snapshot',snapshot,'--format',file_format,'--out',out)
+                self.assertEqual(first.returncode,0,first.stderr); self.assertTrue(out.exists())
+                original=out.read_bytes()
+                again=command('export','--db',db,'--snapshot',snapshot,'--format',file_format,'--out',out)
+                self.assertEqual(again.returncode,2); self.assertIn('output_exists',again.stderr)
+                self.assertEqual(out.read_bytes(),original)
+
 
 if __name__ == '__main__': unittest.main()

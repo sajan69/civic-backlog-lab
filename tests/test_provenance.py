@@ -56,5 +56,12 @@ class ProvenanceTests(unittest.TestCase):
         context = Manifest.parse(metadata())
         with self.assertRaises(ValueError): source_query(context.cohort_start, context.cohort_end, "DOT' OR 1=1")
 
+    def test_complete_declaration_cannot_contradict_changed_acquisition_checks(self):
+        value = acquisition(); value['source_updated_after'] = 1001; value['consistency'] = 'changed_or_unchecked'
+        with self.assertRaisesRegex(InputError, 'invalid_acquisition_metadata'):
+            Manifest.parse(metadata(source='nyc311', agency='DOT', acquisition=value))
+        context = Manifest.parse(metadata(source='nyc311', agency='DOT', completeness='unknown', acquisition=value))
+        self.assertEqual(context.completeness, 'unknown')
+
 
 if __name__ == '__main__': unittest.main()

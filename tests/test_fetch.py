@@ -98,6 +98,18 @@ class FetchTests(unittest.TestCase):
 
 
 class TransportTests(unittest.TestCase):
+    def test_packaged_timezone_data_supports_hosts_without_system_iana_files(self):
+        import zoneinfo
+        original = zoneinfo.TZPATH
+        try:
+            zoneinfo.reset_tzpath(())
+            zoneinfo.ZoneInfo.clear_cache()
+            local = datetime(2026,10,1,14,tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo('America/New_York'))
+            self.assertEqual(local.hour,10)
+        finally:
+            zoneinfo.reset_tzpath(original)
+            zoneinfo.ZoneInfo.clear_cache()
+
     def test_transport_bounds_body_bytes_and_request_budget(self):
         from unittest.mock import patch
         class Response:

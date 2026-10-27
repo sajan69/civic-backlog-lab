@@ -66,7 +66,7 @@ class ImportTests(unittest.TestCase):
 
     def test_csv_current_and_legacy_labels_map_without_sensitive_fields(self):
         path = self.path.with_suffix('.csv')
-        for problem_label in ("Problem", "Complaint Type"):
+        for problem_label in ("Problem", "Complaint Type", "Problem (formerly Complaint Type)"):
             with path.open('w', newline='') as stream:
                 writer = csv.writer(stream); writer.writerow(["Unique Key", "Created Date", "Closed Date", "Agency", problem_label, "Status", "Borough", "Incident Address"])
                 writer.writerow(["1001", "2026-09-01T12:00:00", "", "DOT", "Street Condition", "Open", "QUEENS", "private marker"])

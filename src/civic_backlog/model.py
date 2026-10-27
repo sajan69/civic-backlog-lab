@@ -91,6 +91,9 @@ class Manifest:
             try:
                 if value["source"] != "nyc311": raise ValueError()
                 acquisition = validate_acquisition(acquisition, start, end, agency)
+                if value["completeness"] == "complete" and (acquisition["consistency"] != "stable_checks"
+                        or acquisition["termination"] in ("row_limit", "page_limit")):
+                    raise ValueError()
             except (ValueError, TypeError, KeyError, AttributeError):
                 raise InputError("invalid_acquisition_metadata") from None
         return cls(value["source"], acquired, start, end, observed, value["completeness"], agency, acquisition)
